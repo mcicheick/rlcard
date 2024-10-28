@@ -1,6 +1,9 @@
 import numpy as np
+import tqdm
 
 from rlcard.games.base import Card
+from rlcard.games.i151.round import I151Round
+
 
 def set_seed(seed):
     if seed is not None:
@@ -17,6 +20,7 @@ def set_seed(seed):
         import random
         random.seed(seed)
 
+
 def get_device():
     import torch
     if torch.backends.mps.is_available():
@@ -29,7 +33,8 @@ def get_device():
         device = torch.device("cpu")
         print("--> Running on the CPU")
 
-    return device    
+    return device
+
 
 def init_standard_deck():
     ''' Initialize a standard deck of 52 cards
@@ -41,6 +46,7 @@ def init_standard_deck():
     rank_list = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
     res = [Card(suit, rank) for suit in suit_list for rank in rank_list]
     return res
+
 
 def init_54_deck():
     ''' Initialize a standard deck of 52 cards, BJ and RJ
@@ -54,6 +60,7 @@ def init_54_deck():
     res.append(Card('BJ', ''))
     res.append(Card('RJ', ''))
     return res
+
 
 def rank2int(rank):
     ''' Get the coresponding number of a rank.
@@ -87,6 +94,7 @@ def rank2int(rank):
         return 13
     return None
 
+
 def elegent_form(card):
     ''' Get a elegent form of a card string
 
@@ -96,10 +104,11 @@ def elegent_form(card):
     Returns:
         elegent_card (string): A nice form of card
     '''
-    suits = {'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣','s': '♠', 'h': '♥', 'd': '♦', 'c': '♣' }
+    suits = {'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣', 's': '♠', 'h': '♥', 'd': '♦', 'c': '♣'}
     rank = '10' if card[1] == 'T' else card[1]
 
     return suits[card[0]] + rank
+
 
 def print_card(cards):
     ''' Nicely print a card or list of cards
@@ -148,7 +157,8 @@ def print_card(cards):
             lines[8].append('└─────────┘')
 
     for line in lines:
-        print ('   '.join(line))
+        print('   '.join(line))
+
 
 def reorganize(trajectories, payoffs):
     ''' Reorganize the trajectory to make it RL friendly
@@ -165,18 +175,19 @@ def reorganize(trajectories, payoffs):
     new_trajectories = [[] for _ in range(num_players)]
 
     for player in range(num_players):
-        for i in range(0, len(trajectories[player])-2, 2):
-            if i ==len(trajectories[player])-3:
+        for i in range(0, len(trajectories[player]) - 2, 2):
+            if i == len(trajectories[player]) - 3:
                 reward = payoffs[player]
-                done =True
+                done = True
             else:
                 reward, done = 0, False
-            transition = trajectories[player][i:i+3].copy()
+            transition = trajectories[player][i:i + 3].copy()
             transition.insert(2, reward)
             transition.append(done)
 
             new_trajectories[player].append(transition)
     return new_trajectories
+
 
 def remove_illegal(action_probs, legal_actions):
     ''' Remove illegal actions and normalize the
@@ -197,6 +208,7 @@ def remove_illegal(action_probs, legal_actions):
         probs /= sum(probs)
     return probs
 
+
 def tournament(env, num):
     ''' Evaluate he performance of the agents in the environment
 
@@ -209,7 +221,7 @@ def tournament(env, num):
     '''
     payoffs = [0 for _ in range(env.num_players)]
     counter = 0
-    while counter < num:
+    for _ in tqdm.tqdm(range(num), postfix=f'Evaluation'):
         _, _payoffs = env.run(is_training=False)
         if isinstance(_payoffs, list):
             for _p in _payoffs:
@@ -223,6 +235,7 @@ def tournament(env, num):
     for i, _ in enumerate(payoffs):
         payoffs[i] /= counter
     return payoffs
+
 
 def plot_curve(csv_path, save_path, algorithm):
     ''' Read data from csv file and plot the results
@@ -248,4 +261,3 @@ def plot_curve(csv_path, save_path, algorithm):
             os.makedirs(save_dir)
 
         fig.savefig(save_path)
-

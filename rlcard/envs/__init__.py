@@ -47,3 +47,8 @@ register(
     env_id='bridge',
     entry_point='rlcard.envs.bridge:BridgeEnv',
 )
+
+register(
+    env_id='i151',
+    entry_point='rlcard.envs.i151:I151Env',
+)

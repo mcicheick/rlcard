@@ -26,6 +26,9 @@ def load_model(model_path, env=None, position=None, device=None):
     elif model_path == 'random':  # Random model
         from rlcard.agents import RandomAgent
         agent = RandomAgent(num_actions=env.num_actions)
+    elif model_path == 'human':  # Human model
+        from rlcard.agents import I151HumanAgent
+        agent = I151HumanAgent(num_actions=env.num_actions)
     else:  # A model in the model zoo
         from rlcard import models
         agent = models.load(model_path).agents[position]
@@ -69,6 +72,7 @@ if __name__ == '__main__':
             'no-limit-holdem',
             'uno',
             'gin-rummy',
+            'i151',
         ],
     )
     parser.add_argument(
@@ -77,7 +81,7 @@ if __name__ == '__main__':
         default=[
             'experiments/leduc_holdem_dqn_result/model.pth',
             'random',
-        ],
+        ]
     )
     parser.add_argument(
         '--cuda',
@@ -96,7 +100,6 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     evaluate(args)
 

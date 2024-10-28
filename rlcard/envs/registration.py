@@ -2,9 +2,10 @@ import importlib
 
 # Default Config
 DEFAULT_CONFIG = {
-        'allow_step_back': False,
-        'seed': None,
-        }
+    'allow_step_back': False,
+    'seed': None,
+}
+
 
 class EnvSpec(object):
     ''' A specification for a particular instance of the environment.
@@ -30,6 +31,7 @@ class EnvSpec(object):
         '''
         env = self._entry_point(config)
         return env
+
 
 class EnvRegistry(object):
     ''' Register an environment (game) by ID
@@ -62,8 +64,10 @@ class EnvRegistry(object):
             raise ValueError('Cannot find env_id: {}'.format(env_id))
         return self.env_specs[env_id].make(config)
 
+
 # Have a global registry
 registry = EnvRegistry()
+
 
 def register(env_id, entry_point):
     ''' Register an environment
@@ -73,6 +77,7 @@ def register(env_id, entry_point):
         entry_point (string): A string the indicates the location of the envronment class
     '''
     return registry.register(env_id, entry_point)
+
 
 def make(env_id, config={}):
     ''' Create and environment instance
